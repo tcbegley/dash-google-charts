@@ -1,6 +1,6 @@
 {
   "name": "dash-google-charts",
-  "version": "0.0.1",
+  "version": "0.0.2-dev",
   "description": "Google Charts for Plotly Dash",
   "main": "lib/dash-google-charts.min.js",
   "scripts": {
