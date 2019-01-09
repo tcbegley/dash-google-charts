@@ -1,0 +1,52 @@
+{
+  "name": "dash-google-charts",
+  "version": "0.0.1",
+  "description": "Google Charts for Plotly Dash",
+  "main": "lib/dash-google-charts.min.js",
+  "scripts": {
+    "build-dist": "npm run clean:py && npm run build:py && webpack --config=webpack/config.dist.js",
+    "clean": "npm run clean:py && npm run clean:lib",
+    "clean:py": "mkdirp dash_google_charts/_components && rimraf dash_google_charts/_components",
+    "clean:lib": "mkdirp lib && rimraf lib/",
+    "demo": "webpack-dev-server --hot --inline --port=8888 --config=webpack/config.demo.js",
+    "build:lib": "webpack --config=webpack/config.lib.js",
+    "build:py": "mkdirp dash_google_charts/_components && dash-generate-components ./src/components dash_google_charts/_components && move-cli dash_google_charts/_components/_imports_.py dash_google_charts/_components/__init__.py",
+    "format": "prettier src/**/*.js --write",
+    "lint": "prettier src/**/*.js --list-different",
+    "prepublish": "NODE_ENV=production npm run build-dist && NODE_ENV=production npm run build:lib",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tom Begley",
+  "license": "Apache-2.0",
+  "files": [
+    "lib",
+    "src",
+    "LICENSE.txt",
+    "README.md"
+  ],
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-transform-es2015-modules-commonjs-simple": "^6.7.4",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "copyfiles": "^2.1.0",
+    "css-loader": "^1.0.1",
+    "jsdom": "^12.0.0",
+    "mkdirp": "^0.5.1",
+    "move-cli": "^1.2.0",
+    "prettier": "^1.14.3",
+    "react-docgen": "^2.21.0",
+    "rimraf": "^2.6.2",
+    "style-loader": "^0.23.1",
+    "webpack": "^4.19.1",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.8"
+  },
+  "dependencies": {
+    "prop-types": "^15.6.2",
+    "react": "^16.7.0",
+    "react-google-charts": "^2.0.29"
+  }
+}
