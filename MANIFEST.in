@@ -1,0 +1,2 @@
+include dash_google_charts/_components/dash_google_charts.min.js
+include dash_google_charts/_components/metadata.json
