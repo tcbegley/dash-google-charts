@@ -1,0 +1,9 @@
+node_modules
+lib
+*.egg-info
+dash_google_charts/bundle.js
+dash_google_charts/metadata.json
+*__pycache__
+*.pyc
+dist
+changelog.tmp
