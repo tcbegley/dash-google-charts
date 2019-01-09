@@ -3,6 +3,7 @@ lib
 *.egg-info
 dash_google_charts/bundle.js
 dash_google_charts/metadata.json
+dash_google_charts/_components
 *__pycache__
 *.pyc
 dist
