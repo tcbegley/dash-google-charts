@@ -2,9 +2,32 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Chart as GChart} from 'react-google-charts';
 
-const Chart = props => {
-  return <GChart {...props} />;
-};
+class Chart extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.onSelect = this.onSelect.bind(this);
+  }
+
+  onSelect(selectData) {
+    const {chartWrapper} = selectData;
+    const chart = chartWrapper.getChart();
+    const dataTable = chartWrapper.getDataTable()
+    const selection = chart.getSelection();
+    if (this.props.setProps) {
+      this.props.setProps({selection: selection, dataTable: dataTable});
+    }
+  }
+
+  render() {
+    return (
+      <GChart
+        {...this.props}
+        chartEvents={[{eventName: 'select', callback: this.onSelect}]}
+      />
+    );
+  }
+}
 
 Chart.propTypes = {
   /**
@@ -62,69 +85,16 @@ Chart.propTypes = {
     PropTypes.arrayOf(PropTypes.object),
     PropTypes.object
   ]),
-  mapsApiKey: PropTypes.string
+  mapsApiKey: PropTypes.string,
+  spreadSheetUrl: PropTypes.string,
+  spreadSheetQueryParameters: PropTypes.object,
+  formatters: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.object),
+    PropTypes.object
+  ]),
+  legend_toggle: PropTypes.boolean,
+  selection: PropTypes.object,
+  dataTable: PropTypes.object
 };
-
-// height?: string | number;
-//   width?: string | number;
-//   graphID?: string;
-//   chartType: GoogleChartWrapperChartType;
-//   diffdata?: {
-//     old: any;
-//     new: any;
-//   };
-//   options?: ChartWrapperOptions["options"];
-//   loader?: JSX.Element;
-//   errorElement?: JSX.Element;
-//   data?: any[] | {};
-//   rows?: GoogleDataTableRow[];
-//   columns?: GoogleDataTableColumn[];
-//   chartActions?: GoogleChartAction[];
-//   chartEvents?: ReactGoogleChartEvent[];
-//   chartVersion?: GoogleChartVersion;
-//   chartPackages?: GoogleChartPackages[];
-//   chartLanguage?: string;
-//   mapsApiKey?: string;
-//   graph_id?: string;
-//   legendToggle?: boolean;
-//   legend_toggle?: boolean;
-//   getChartWrapper?: (
-//     chartWrapper: GoogleChartWrapper,
-//     google: GoogleViz
-//   ) => void;
-//   getChartEditor?: (
-//     args: {
-//       chartEditor: GoogleChartEditor;
-//       chartWrapper: GoogleChartWrapper;
-//       google: GoogleViz;
-//     }
-//   ) => void;
-//   className?: string;
-//   style?: React.CSSProperties;
-//   formatters?: {
-//     column: number;
-//     type:
-//       | "ArrowFormat"
-//       | "BarFormat"
-//       | "ColorFormat"
-//       | "DateFormat"
-//       | "NumberFormat"
-//       | "PatternFormat";
-//     options?: {};
-//   }[];
-//   spreadSheetUrl?: string;
-//   spreadSheetQueryParameters?: {
-//     headers: number;
-//     gid?: number | string;
-//     sheet?: string;
-//     query?: string;
-//     access_token?: string;
-//   };
-//   rootProps?: any;
-//   controls?: GoogleChartControlProp[];
-//   render?: ReactGoogleChartDashboardRender;
-//   //https://developers.google.com/chart/interactive/docs/gallery/toolbar#example_1
-//   toolbarItems?: GoogleChartToolbarItem[];
-//   toolbarID?: string;
 
 export default Chart;
