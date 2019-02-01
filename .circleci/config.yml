@@ -1,0 +1,55 @@
+version: 2.1
+
+commands:
+  python-lint:
+    description: "Lint Python source"
+    steps:
+      - checkout
+      - run: sudo pip install black flake8 isort
+      - run: black . --check
+      - run: flake8
+      - run: isort -rc -c
+
+  python-test:
+    description: "Compile Python source to check for syntax errors"
+    steps:
+      - checkout
+      - run: python -m compileall dash_google_charts
+
+  js:
+    description: "Compile JavaScript source and lint"
+    steps:
+      - checkout
+      - run: sudo pip install dash
+      - run: npm -v
+      - run: npm install
+      - run: npm run lint
+
+jobs:
+  python27:
+    docker:
+      - image: circleci/python:2.7.15
+    steps:
+      - python-test
+
+  python35:
+    docker:
+      - image: circleci/python:3.5.6
+    steps:
+      - python-test
+
+  python36:
+    docker:
+      - image: circleci/python:3.6.8-node
+    steps:
+      - python-test
+      - python-lint
+      - js
+
+workflows:
+  version: 2.1
+  build:
+    jobs:
+      - python27
+      - python35
+      - python36

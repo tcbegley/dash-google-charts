@@ -12,7 +12,7 @@ class Chart extends React.Component {
   onSelect(selectData) {
     const {chartWrapper} = selectData;
     const chart = chartWrapper.getChart();
-    const dataTable = chartWrapper.getDataTable()
+    const dataTable = chartWrapper.getDataTable();
     const selection = chart.getSelection();
     if (this.props.setProps) {
       this.props.setProps({selection: selection, dataTable: dataTable});

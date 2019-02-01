@@ -10,9 +10,7 @@ METADATA_PATH = os.path.join(_current_path, "_components", "metadata.json")
 
 _js_dist = [
     {
-        "relative_package_path": (
-            "_components/dash_google_charts.min.js"
-        ),
+        "relative_package_path": ("_components/dash_google_charts.min.js"),
         "namespace": "dash_google_charts",
     }
 ]

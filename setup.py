@@ -8,9 +8,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 def _get_version():
     """ Get version by parsing _version programmatically """
     version_ns = {}
-    with open(
-        os.path.join(HERE, "dash_google_charts", "_version.py")
-    ) as f:
+    with open(os.path.join(HERE, "dash_google_charts", "_version.py")) as f:
         exec(f.read(), {}, version_ns)
     version = version_ns["__version__"]
     return version
@@ -35,6 +33,7 @@ setup(
     install_requires=["dash>=0.32.1", "dash-html-components"],
     include_package_data=True,
     classifiers=[
+        "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.5",
