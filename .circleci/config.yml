@@ -46,6 +46,12 @@ jobs:
       - python-lint
       - js
 
+  python37:
+    docker:
+      - image: circleci/python:3.7.2
+    steps:
+      - python-test
+
 workflows:
   version: 2.1
   build:
@@ -53,3 +59,4 @@ workflows:
       - python27
       - python35
       - python36
+      - python37
