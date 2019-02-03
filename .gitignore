@@ -8,3 +8,4 @@ dash_google_charts/_components
 *.pyc
 dist
 changelog.tmp
+pip-wheel-metadata

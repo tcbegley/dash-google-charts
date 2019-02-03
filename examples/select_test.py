@@ -3,15 +3,14 @@ import json
 import dash
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from dash_google_charts import Chart
+from dash_google_charts import ScatterChart
 
 app = dash.Dash()
 
 app.layout = html.Div(
     [
-        Chart(
+        ScatterChart(
             id="chart",
-            chartType="ScatterChart",
             data=[
                 ["x", "dogs"],
                 [0, 0],

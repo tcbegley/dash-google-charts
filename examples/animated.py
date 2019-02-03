@@ -7,16 +7,15 @@ import dash_html_components as html
 import numpy as np
 import pandas as pd
 from dash.dependencies import Input, Output
-from dash_google_charts import Chart
+from dash_google_charts import ScatterChart
 
 app = dash.Dash()
 
 app.layout = html.Div(
     [
         dcc.Interval(id="interval", interval=1000),
-        Chart(
+        ScatterChart(
             id="scatter",
-            chartType="ScatterChart",
             options={
                 "title": "A Scatter Plot",
                 "animation": {

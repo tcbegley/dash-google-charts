@@ -1,13 +1,10 @@
-"""
-Example app based on https://react-google-charts.com/pie-chart
-"""
 import dash
-from dash_google_charts import Chart
+from dash_google_charts import PieChart
 
 app = dash.Dash()
 
-app.layout = Chart(
-    chartType="PieChart",
+app.layout = PieChart(
+    height="500px",
     data=[
         ["Task", "Hours per Day"],
         ["Work", 11],
@@ -19,6 +16,5 @@ app.layout = Chart(
     options={"title": "My Daily Activities"},
 )
 
-
 if __name__ == "__main__":
-    app.run_server(port=8888)
+    app.run_server()
