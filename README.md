@@ -1,6 +1,10 @@
 # dash-google-charts
 
 [![CircleCI](https://circleci.com/gh/tcbegley/dash-google-charts/tree/master.svg?style=shield)](https://circleci.com/gh/tcbegley/dash-google-charts/tree/master)
+[![PyPI version](https://badge.fury.io/py/dash-google-charts.svg)](https://badge.fury.io/py/dash-google-charts)
+![](https://img.shields.io/github/license/tcbegley/dash-google-charts.svg?style=flat)
+![](https://img.shields.io/pypi/pyversions/dash-google-charts.svg?style=flat)
+
 
 Google Charts components for Plotly Dash built on top of [react-google-charts][rgc].
 
