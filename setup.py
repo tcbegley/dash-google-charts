@@ -40,4 +40,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
+    project_urls={
+        "Bug Reports": "https://github.com/tcbegley/dash-google-charts/issues"
+    },
 )
