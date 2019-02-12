@@ -108,7 +108,7 @@ class DataTable:
 
     Columns as list of tuples [col1, col2, col3]
     table_description: [('a', 'number'), ('b', 'string')]
-    AppendData( [[1, 'z'], [2, 'w'], [4, 'o'], [5, 'k']] )
+    append_data( [[1, 'z'], [2, 'w'], [4, 'o'], [5, 'k']] )
     Table:
         a  b   <--- these are column ids/labels
         1  z
@@ -119,7 +119,7 @@ class DataTable:
     Dictionary of columns, where key is a column, and value is a list of
     columns  {col1: [col2, col3]}
     table_description: {('a', 'number'): [('b', 'number'), ('c', 'string')]}
-    AppendData( data: {1: [2, 'z'], 3: [4, 'w']}
+    append_data( data: {1: [2, 'z'], 3: [4, 'w']}
     Table:
         a  b  c
         1  2  z
@@ -128,7 +128,7 @@ class DataTable:
     Dictionary where key is a column, and the value is itself a dictionary of
     columns {col1: {col2, col3}}
     table_description: {('a', 'number'): {'b': 'number', 'c': 'string'}}
-    AppendData( data: {1: {'b': 2, 'c': 'z'}, 3: {'b': 4, 'c': 'w'}}
+    append_data( data: {1: {'b': 2, 'c': 'z'}, 3: {'b': 4, 'c': 'w'}}
     Table:
         a  b  c
         1  2  z
@@ -145,14 +145,14 @@ class DataTable:
         ----------
         table_description
             A table schema, following one of the formats described in
-            TableDescriptionParser(). Schemas describe the column names, data
-            types, and labels. See TableDescriptionParser() for acceptable
+            table_description_parser(). Schemas describe the column names, data
+            types, and labels. See table_description_parser() for acceptable
             formats.
         data: optional
             If given, fills the table with the given data. The data structure
             must be consistent with schema in table_description. See the class
             documentation for more information on acceptable data. You can add
-            data later by calling AppendData().
+            data later by calling append_data().
         custom_properties: optional
             A dictionary from string to string that goes into the table's
             custom properties. This can be later changed by changing
@@ -164,16 +164,16 @@ class DataTable:
             Raised if the data and the description did not match, or did not
             use the supported formats.
     """
-        self.__columns = self.TableDescriptionParser(table_description)
-        self.__data = []
+        self._columns = self.table_description_parser(table_description)
+        self._data = []
         self.custom_properties = {}
         if custom_properties is not None:
             self.custom_properties = custom_properties
         if data:
-            self.LoadData(data)
+            self.load_data(data)
 
     @staticmethod
-    def CoerceValue(value, value_type):
+    def _coerce_value(value, value_type):
         """
         Coerces a single value into the type expected for its column. Internal
         helper method.
@@ -199,7 +199,7 @@ class DataTable:
         formatted value. One can also have a null-valued cell with formatted
         value and/or custom properties by specifying None for the value.
         This method ignores the custom properties except for checking that it
-        is a dictionary. The custom properties are handled in the ToJSon and
+        is a dictionary. The custom properties are handled in the to_json and
         ToJSCode methods.
 
         The real type of the given value is not strictly checked. For example,
@@ -208,10 +208,10 @@ class DataTable:
 
     Examples
     --------
-    CoerceValue(None, "string") returns None
-    CoerceValue((5, "5$"), "number") returns (5, "5$")
-    CoerceValue(100, "string") returns "100"
-    CoerceValue(0, "boolean") returns False
+    _coerce_value(None, "string") returns None
+    _coerce_value((5, "5$"), "number") returns (5, "5$")
+    _coerce_value(100, "string") returns "100"
+    _coerce_value(0, "boolean") returns False
 
     Raises
     ------
@@ -232,7 +232,7 @@ class DataTable:
                 raise DataTableException(
                     "Formatted value is not string, given %s." % type(value[1])
                 )
-            js_value = DataTable.CoerceValue(value[0], value_type)
+            js_value = DataTable._coerce_value(value[0], value_type)
             return (js_value,) + value[1:]
 
         t_value = type(value)
@@ -288,58 +288,7 @@ class DataTable:
         raise DataTableException("Unsupported type %s" % value_type)
 
     @staticmethod
-    def EscapeForJSCode(encoder, value):
-        if value is None:
-            return "null"
-        elif isinstance(value, datetime.datetime):
-            if value.microsecond == 0:
-                # If it's not ms-resolution, leave that out to save space.
-                return "new Date(%d,%d,%d,%d,%d,%d)" % (
-                    value.year,
-                    value.month - 1,  # To match JS
-                    value.day,
-                    value.hour,
-                    value.minute,
-                    value.second,
-                )
-            else:
-                return "new Date(%d,%d,%d,%d,%d,%d,%d)" % (
-                    value.year,
-                    value.month - 1,  # match JS
-                    value.day,
-                    value.hour,
-                    value.minute,
-                    value.second,
-                    value.microsecond / 1000,
-                )
-        elif isinstance(value, datetime.date):
-            return "new Date(%d,%d,%d)" % (
-                value.year,
-                value.month - 1,
-                value.day,
-            )
-        else:
-            return encoder.encode(value)
-
-    @staticmethod
-    def ToString(value):
-        if value is None:
-            return "(empty)"
-        elif isinstance(
-            value, (datetime.datetime, datetime.date, datetime.time)
-        ):
-            return str(value)
-        elif isinstance(value, str):
-            return value
-        elif isinstance(value, bool):
-            return str(value).lower()
-        elif isinstance(value, bytes):
-            return str(value, encoding="utf-8")
-        else:
-            return str(value)
-
-    @staticmethod
-    def ColumnTypeParser(description):
+    def column_type_parser(description):
         """
         Parses a single column description. Internal helper method.
 
@@ -425,7 +374,7 @@ class DataTable:
         return desc_dict
 
     @staticmethod
-    def TableDescriptionParser(table_description, depth=0):
+    def table_description_parser(table_description, depth=0):
         """
         Parses the table_description object for internal use. Parses the
         user-submitted table description into an internal format used by the
@@ -446,7 +395,7 @@ class DataTable:
             - id: the id of the column
             - name: The name of the column
             - type: The datatype of the elements in this column. Allowed types
-              are described in ColumnTypeParser().
+              are described in column_type_parser().
             - depth: The depth of this column in the table description
             - container: 'dict', 'iter' or 'scalar' for parsing the format
               easily.
@@ -524,7 +473,7 @@ class DataTable:
     """
         # For the recursion step, we check for a scalar object (string, tuple)
         if isinstance(table_description, (str, tuple)):
-            parsed_col = DataTable.ColumnTypeParser(table_description)
+            parsed_col = DataTable.column_type_parser(table_description)
             parsed_col["depth"] = depth
             parsed_col["container"] = "scalar"
             return [parsed_col]
@@ -538,7 +487,7 @@ class DataTable:
             # We expects a non-dictionary iterable item.
             columns = []
             for desc in table_description:
-                parsed_col = DataTable.ColumnTypeParser(desc)
+                parsed_col = DataTable.column_type_parser(desc)
                 parsed_col["depth"] = depth
                 parsed_col["container"] = "iter"
                 columns.append(parsed_col)
@@ -571,37 +520,37 @@ class DataTable:
             # unique
             for key, value in sorted(table_description.items()):
                 # We parse the column type as (key, type) or (key, type, label)
-                # using ColumnTypeParser.
+                # using column_type_parser.
                 if isinstance(value, tuple):
-                    parsed_col = DataTable.ColumnTypeParser((key,) + value)
+                    parsed_col = DataTable.column_type_parser((key,) + value)
                 else:
-                    parsed_col = DataTable.ColumnTypeParser((key, value))
+                    parsed_col = DataTable.column_type_parser((key, value))
                 parsed_col["depth"] = depth
                 parsed_col["container"] = "dict"
                 columns.append(parsed_col)
             return columns
         # This is an outer dictionary, must have at most one key.
-        parsed_col = DataTable.ColumnTypeParser(
+        parsed_col = DataTable.column_type_parser(
             sorted(table_description.keys())[0]
         )
         parsed_col["depth"] = depth
         parsed_col["container"] = "dict"
-        return [parsed_col] + DataTable.TableDescriptionParser(
+        return [parsed_col] + DataTable.table_description_parser(
             sorted(table_description.values())[0], depth=depth + 1
         )
 
     @property
     def columns(self):
         """Returns the parsed table description."""
-        return self.__columns
+        return self._columns
 
-    def NumberOfRows(self):
+    def __len__(self):
         """
         Returns the number of rows in the current data stored in the table.
         """
-        return len(self.__data)
+        return len(self._data)
 
-    def SetRowsCustomProperties(self, rows, custom_properties):
+    def set_rows_custom_properties(self, rows, custom_properties):
         """
         Sets the custom properties for given row(s). Can accept a single row or
         an iterable of rows. Sets the given custom properties for all specified
@@ -618,9 +567,9 @@ class DataTable:
         if not hasattr(rows, "__iter__"):
             rows = [rows]
         for row in rows:
-            self.__data[row] = (self.__data[row][0], custom_properties)
+            self._data[row] = (self._data[row][0], custom_properties)
 
-    def LoadData(self, data, custom_properties=None):
+    def load_data(self, data, custom_properties=None):
         """
         Loads new rows to the data table, clearing existing rows. May also set
         the custom_properties for the added rows. The given custom properties
@@ -635,15 +584,16 @@ class DataTable:
             A dictionary of string to string to set as the custom properties
             for all rows.
         """
-        self.__data = []
-        self.AppendData(data, custom_properties)
+        self._data = []
+        self.append_data(data, custom_properties)
 
-    def AppendData(self, data, custom_properties=None):
+    def append_data(self, data, custom_properties=None):
         """
         Appends new data to the table. Data is appended in rows. Data must
-        comply with the table schema passed in to __init__(). See CoerceValue()
-        for a list of acceptable data types. See the class documentation for
-        more information and examples of schema and data values.
+        comply with the table schema passed in to __init__(). See
+        _coerce_value() for a list of acceptable data types. See the class
+        documentation for more information and examples of schema and data
+        values.
 
         Parameters
         ----------
@@ -660,29 +610,29 @@ class DataTable:
             The data structure does not match the description.
         """
         # If the maximal depth is 0, we simply iterate over the data table
-        # lines and insert them using _InnerAppendData. Otherwise, we simply
-        # let the _InnerAppendData handle all the levels.
-        if not self.__columns[-1]["depth"]:
+        # lines and insert them using _inner_append_data. Otherwise, we simply
+        # let the _inner_append_data handle all the levels.
+        if not self._columns[-1]["depth"]:
             for row in data:
-                self._InnerAppendData(({}, custom_properties), row, 0)
+                self._inner_append_data(({}, custom_properties), row, 0)
         else:
-            self._InnerAppendData(({}, custom_properties), data, 0)
+            self._inner_append_data(({}, custom_properties), data, 0)
 
-    def _InnerAppendData(self, prev_col_values, data, col_index):
-        """Inner function to assist LoadData."""
+    def _inner_append_data(self, prev_col_values, data, col_index):
+        """Inner function to assist load_data."""
         # We first check that col_index has not exceeded the columns size
-        if col_index >= len(self.__columns):
+        if col_index >= len(self._columns):
             raise DataTableException(
                 "The data does not match description, too deep"
             )
 
         # Dealing with the scalar case, the data is the last value.
-        if self.__columns[col_index]["container"] == "scalar":
-            prev_col_values[0][self.__columns[col_index]["id"]] = data
-            self.__data.append(prev_col_values)
+        if self._columns[col_index]["container"] == "scalar":
+            prev_col_values[0][self._columns[col_index]["id"]] = data
+            self._data.append(prev_col_values)
             return
 
-        if self.__columns[col_index]["container"] == "iter":
+        if self._columns[col_index]["container"] == "iter":
             if not hasattr(data, "__iter__") or isinstance(data, dict):
                 raise DataTableException(
                     "Expected iterable object, got %s" % type(data)
@@ -690,11 +640,11 @@ class DataTable:
             # We only need to insert the rest of the columns
             # If there are less items than expected, we only add what there is.
             for value in data:
-                if col_index >= len(self.__columns):
+                if col_index >= len(self._columns):
                     raise DataTableException("Too many elements given in data")
-                prev_col_values[0][self.__columns[col_index]["id"]] = value
+                prev_col_values[0][self._columns[col_index]["id"]] = value
                 col_index += 1
-            self.__data.append(prev_col_values)
+            self._data.append(prev_col_values)
             return
 
         # We know the current level is a dictionary, we verify the type.
@@ -703,28 +653,28 @@ class DataTable:
                 "Expected dictionary at current level, got %s" % type(data)
             )
         # We check if this is the last level
-        if self.__columns[col_index]["depth"] == self.__columns[-1]["depth"]:
+        if self._columns[col_index]["depth"] == self._columns[-1]["depth"]:
             # We need to add the keys in the dictionary as they are
-            for col in self.__columns[col_index:]:
+            for col in self._columns[col_index:]:
                 if col["id"] in data:
                     prev_col_values[0][col["id"]] = data[col["id"]]
-            self.__data.append(prev_col_values)
+            self._data.append(prev_col_values)
             return
 
         # We have a dictionary in an inner depth level.
         if not data.keys():
             # In case this is an empty dictionary, we add a record with the
             # columns filled only until this point.
-            self.__data.append(prev_col_values)
+            self._data.append(prev_col_values)
         else:
             for key in sorted(data):
                 col_values = dict(prev_col_values[0])
-                col_values[self.__columns[col_index]["id"]] = key
-                self._InnerAppendData(
+                col_values[self._columns[col_index]["id"]] = key
+                self._inner_append_data(
                     (col_values, prev_col_values[1]), data[key], col_index + 1
                 )
 
-    def _PreparedData(self, order_by=()):
+    def _prepared_data(self, order_by=()):
         """
         Prepares the data for enumeration - sorting it by order_by.
 
@@ -749,9 +699,9 @@ class DataTable:
             Sort direction not in 'asc' or 'desc'
     """
         if not order_by:
-            return self.__data
+            return self._data
 
-        sorted_data = self.__data[:]
+        sorted_data = self._data[:]
         if isinstance(order_by, str) or (
             isinstance(order_by, tuple)
             and len(order_by) == 2
@@ -777,7 +727,7 @@ class DataTable:
 
         return sorted_data
 
-    def _ToJSonObj(self, columns_order=None, order_by=()):
+    def _to_json_obj(self, columns_order=None, order_by=()):
         """
         Returns an object suitable to be converted to JSON.
 
@@ -789,15 +739,15 @@ class DataTable:
             present.
         order_by: optional
             Specifies the name of the column(s) to sort by. Passed as is to
-            _PreparedData().
+            _prepared_data().
 
         Returns
         -------
-            A dictionary object for use by ToJSon or ToJSonResponse.
+            A dictionary object for use by to_json.
         """
         if columns_order is None:
-            columns_order = [col["id"] for col in self.__columns]
-        col_dict = dict([(col["id"], col) for col in self.__columns])
+            columns_order = [col["id"] for col in self._columns]
+        col_dict = dict([(col["id"], col) for col in self._columns])
 
         # Creating the column JSON objects
         col_objs = []
@@ -813,10 +763,10 @@ class DataTable:
 
         # Creating the rows jsons
         row_objs = []
-        for row, cp in self._PreparedData(order_by):
+        for row, cp in self._prepared_data(order_by):
             cell_objs = []
             for col in columns_order:
-                value = self.CoerceValue(
+                value = self._coerce_value(
                     row.get(col, None), col_dict[col]["type"]
                 )
                 if value is None:
@@ -841,7 +791,7 @@ class DataTable:
 
         return json_obj
 
-    def ToJSon(self, columns_order=None, order_by=()):
+    def to_json(self, columns_order=None, order_by=()):
         """
         Returns a string that can be used in a JS DataTable constructor. This
         method writes a JSON string that can be passed directly into a Google
@@ -865,7 +815,7 @@ class DataTable:
             use it.
         order_by: optional
             Specifies the name of the column(s) to sort by. Passed as is to
-            _PreparedData().
+            _prepared_data().
 
         Returns
         -------
@@ -903,7 +853,7 @@ class DataTable:
     """
 
         encoded_response_str = DataTableJSONEncoder().encode(
-            self._ToJSonObj(columns_order, order_by)
+            self._to_json_obj(columns_order, order_by)
         )
         if not isinstance(encoded_response_str, str):
             return encoded_response_str.encode("utf-8")
