@@ -24,12 +24,12 @@ import json
 
 
 class DataTableException(Exception):
-    """The general exception object thrown by DataTable."""
+    """The general exception object thrown by _DataTable."""
 
     pass
 
 
-class DataTableJSONEncoder(json.JSONEncoder):
+class _DataTableJSONEncoder(json.JSONEncoder):
     """JSON encoder that handles date/time/datetime objects correctly."""
 
     def __init__(self):
@@ -68,7 +68,7 @@ class DataTableJSONEncoder(json.JSONEncoder):
             return super().default(o)
 
 
-class DataTable:
+class _DataTable:
     """
     Wraps the data to convert to a Google Visualization API DataTable. Create
     this object, populate it with data, then call one of the ToJS... methods to
@@ -76,7 +76,7 @@ class DataTable:
     clear all data from the object to reuse it, but you cannot clear individual
     cells, rows, or columns. You also cannot modify the table schema specified
     in the class constructor. You can add new data one or more rows at a time.
-    All data added to an instantiated DataTable must conform to the schema
+    All data added to an instantiated _DataTable must conform to the schema
     passed in to __init__(). You can reorder the columns in the output table,
     and also specify row sorting order by column. The default column order is
     according to the original table_description parameter. Default row sort
@@ -232,7 +232,7 @@ class DataTable:
                 raise DataTableException(
                     "Formatted value is not string, given %s." % type(value[1])
                 )
-            js_value = DataTable._coerce_value(value[0], value_type)
+            js_value = _DataTable._coerce_value(value[0], value_type)
             return (js_value,) + value[1:]
 
         t_value = type(value)
@@ -378,7 +378,7 @@ class DataTable:
         """
         Parses the table_description object for internal use. Parses the
         user-submitted table description into an internal format used by the
-        Python DataTable class. Returns the flat list of parsed columns.
+        Python _DataTable class. Returns the flat list of parsed columns.
 
         Parameters
         ----------
@@ -473,7 +473,7 @@ class DataTable:
     """
         # For the recursion step, we check for a scalar object (string, tuple)
         if isinstance(table_description, (str, tuple)):
-            parsed_col = DataTable.column_type_parser(table_description)
+            parsed_col = _DataTable.column_type_parser(table_description)
             parsed_col["depth"] = depth
             parsed_col["container"] = "scalar"
             return [parsed_col]
@@ -487,7 +487,7 @@ class DataTable:
             # We expects a non-dictionary iterable item.
             columns = []
             for desc in table_description:
-                parsed_col = DataTable.column_type_parser(desc)
+                parsed_col = _DataTable.column_type_parser(desc)
                 parsed_col["depth"] = depth
                 parsed_col["container"] = "iter"
                 columns.append(parsed_col)
@@ -522,20 +522,20 @@ class DataTable:
                 # We parse the column type as (key, type) or (key, type, label)
                 # using column_type_parser.
                 if isinstance(value, tuple):
-                    parsed_col = DataTable.column_type_parser((key,) + value)
+                    parsed_col = _DataTable.column_type_parser((key,) + value)
                 else:
-                    parsed_col = DataTable.column_type_parser((key, value))
+                    parsed_col = _DataTable.column_type_parser((key, value))
                 parsed_col["depth"] = depth
                 parsed_col["container"] = "dict"
                 columns.append(parsed_col)
             return columns
         # This is an outer dictionary, must have at most one key.
-        parsed_col = DataTable.column_type_parser(
+        parsed_col = _DataTable.column_type_parser(
             sorted(table_description.keys())[0]
         )
         parsed_col["depth"] = depth
         parsed_col["container"] = "dict"
-        return [parsed_col] + DataTable.table_description_parser(
+        return [parsed_col] + _DataTable.table_description_parser(
             sorted(table_description.values())[0], depth=depth + 1
         )
 
@@ -820,7 +820,7 @@ class DataTable:
         Returns
         -------
         A JSon constructor string to generate a JS DataTable with the data
-        stored in the DataTable object.
+        stored in the _DataTable object.
 
         Example result (the result is without the newlines):
         {
@@ -852,7 +852,7 @@ class DataTable:
             The data does not match the type.
     """
 
-        encoded_response_str = DataTableJSONEncoder().encode(
+        encoded_response_str = _DataTableJSONEncoder().encode(
             self._to_json_obj(columns_order, order_by)
         )
         if not isinstance(encoded_response_str, str):
