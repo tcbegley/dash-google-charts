@@ -20,7 +20,7 @@ commands:
     description: "Compile JavaScript source and lint"
     steps:
       - checkout
-      - run: sudo pip install dash
+      - run: sudo pip install dash[dev]
       - run: npm -v
       - run: npm install
       - run: npm run lint
