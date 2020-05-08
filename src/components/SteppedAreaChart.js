@@ -78,7 +78,7 @@ SteppedAreaChart.propTypes = {
   /**
    * Allow legend to toggle inclusion of data in chart
    */
-  legend_toggle: PropTypes.boolean,
+  legend_toggle: PropTypes.bool,
 
   /**
    * Data associated to user selection for use in callbacks
